@@ -7,8 +7,8 @@ let iframeClient: SupabaseClient | null = null
 let authListenerSetup = false
 
 export function createClient() {
-  // Check if we're in an iframe
-  const isInIframe = typeof window !== 'undefined' && window.self !== window.top
+  // Check if we're in an iframe - ensure we're in browser context
+  const isInIframe = typeof window !== 'undefined' && typeof window.self !== 'undefined' && typeof window.top !== 'undefined' && window.self !== window.top
   
   if (isInIframe) {
     // Return existing iframe client if already created

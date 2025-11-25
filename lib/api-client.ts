@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/client'
  * Fetch wrapper that automatically adds Authorization header in iframe context
  */
 export async function apiFetch(url: string, options: RequestInit = {}) {
-  const isInIframe = typeof window !== 'undefined' && window.self !== window.top
+  const isInIframe = typeof window !== 'undefined' && typeof window.self !== 'undefined' && typeof window.top !== 'undefined' && window.self !== window.top
   
   if (isInIframe) {
     // Get access token from Supabase session

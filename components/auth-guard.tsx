@@ -5,13 +5,17 @@ import { createClient } from '@/lib/supabase/client'
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const [isInIframe, setIsInIframe] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    // Check if we're in an iframe
-    const isInIframe = typeof window !== 'undefined' && window.self !== window.top
+    setIsMounted(true)
+    // Check if we're in an iframe - only on client side
+    const inIframe = window.self !== window.top
+    setIsInIframe(inIframe)
 
     // Only do client-side auth check in iframe context
-    if (isInIframe) {
+    if (inIframe) {
       const supabase = createClient()
       
       const checkAuth = async () => {
@@ -51,8 +55,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, []) // Empty dependency array - only run once on mount
 
+  // Don't render anything until mounted (prevents hydration mismatch)
+  if (!isMounted) {
+    return null
+  }
+
   // Show loading state while checking auth in iframe
-  const isInIframe = typeof window !== 'undefined' && window.self !== window.top
   if (isInIframe && isAuthenticated === null) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-[--bg]">

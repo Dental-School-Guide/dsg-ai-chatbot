@@ -86,7 +86,7 @@ const SidebarComponent = forwardRef<SidebarRef, SidebarProps>(({ className, acti
 
   // Fetch conversations on mount (with small delay for iframe auth)
   useEffect(() => {
-    const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
+    const isInIframe = typeof window !== 'undefined' && typeof window.self !== 'undefined' && typeof window.top !== 'undefined' && window.self !== window.top;
     
     if (isInIframe) {
       // Wait a bit for session to be fully established in iframe
