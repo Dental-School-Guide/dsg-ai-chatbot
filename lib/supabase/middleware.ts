@@ -35,17 +35,26 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Check if request is from an iframe by looking at Sec-Fetch-Dest header
+  const isIframeRequest = request.headers.get('sec-fetch-dest') === 'iframe'
+  
   if (
     !user &&
     !request.nextUrl.pathname.startsWith('/login') &&
     !request.nextUrl.pathname.startsWith('/signup') &&
     !request.nextUrl.pathname.startsWith('/forgot-password') &&
-    !request.nextUrl.pathname.startsWith('/reset-password') &&
-    !request.nextUrl.pathname.startsWith('/widget')
+    !request.nextUrl.pathname.startsWith('/reset-password')
   ) {
-    // no user, potentially respond by redirecting the user to the login page
+    // Redirect to appropriate login page based on current path
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    
+    // If user is on widget route, redirect to widget login
+    if (request.nextUrl.pathname.startsWith('/widget')) {
+      url.pathname = '/widget/login'
+    } else {
+      url.pathname = '/login'
+    }
+    
     return NextResponse.redirect(url)
   }
 

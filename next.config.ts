@@ -8,8 +8,8 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Allow embedding in iframes from any origin
-        source: '/widget/:path*',
+        // Allow embedding entire app in iframes from any origin
+        source: '/:path*',
         headers: [
           {
             key: 'X-Frame-Options',
