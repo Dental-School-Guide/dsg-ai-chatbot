@@ -84,9 +84,19 @@ const SidebarComponent = forwardRef<SidebarRef, SidebarProps>(({ className, acti
     refresh: fetchConversations
   }));
 
-  // Fetch conversations on mount
+  // Fetch conversations on mount (with small delay for iframe auth)
   useEffect(() => {
-    fetchConversations();
+    const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
+    
+    if (isInIframe) {
+      // Wait a bit for session to be fully established in iframe
+      const timer = setTimeout(() => {
+        fetchConversations();
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      fetchConversations();
+    }
   }, []);
 
   const fetchConversations = async () => {
@@ -95,6 +105,15 @@ const SidebarComponent = forwardRef<SidebarRef, SidebarProps>(({ className, acti
       if (response.ok) {
         const data = await response.json();
         setConversations(data.conversations || []);
+      } else {
+        console.error('Failed to fetch conversations:', response.status, response.statusText);
+        // Try to read error message
+        try {
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+        } catch (e) {
+          // Ignore if can't read response
+        }
       }
     } catch (error) {
       console.error('Error fetching conversations:', error);

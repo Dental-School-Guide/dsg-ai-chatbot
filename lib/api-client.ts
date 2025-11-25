@@ -9,7 +9,11 @@ export async function apiFetch(url: string, options: RequestInit = {}) {
   if (isInIframe) {
     // Get access token from Supabase session
     const supabase = createClient()
-    const { data: { session } } = await supabase.auth.getSession()
+    const { data: { session }, error } = await supabase.auth.getSession()
+    
+    if (error) {
+      console.error('[API Client] Error getting session:', error)
+    }
     
     if (session?.access_token) {
       // Add Authorization header
@@ -18,8 +22,21 @@ export async function apiFetch(url: string, options: RequestInit = {}) {
         'Authorization': `Bearer ${session.access_token}`,
       }
       console.log('[API Client] Adding auth token to request:', url)
+    } else {
+      console.warn('[API Client] No session found for iframe request:', url)
     }
   }
   
-  return fetch(url, options)
+  const response = await fetch(url, options)
+  
+  // Log errors for debugging
+  if (!response.ok) {
+    console.error('[API Client] Request failed:', {
+      url,
+      status: response.status,
+      statusText: response.statusText
+    })
+  }
+  
+  return response
 }
