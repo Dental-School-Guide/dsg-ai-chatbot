@@ -38,9 +38,12 @@ export async function updateSession(request: NextRequest) {
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
-  // For iframe requests, skip server-side auth check since they use localStorage
-  // The client-side will handle authentication
-  if (!isIframeRequest) {
+  // Skip auth checks for:
+  // 1. API routes (they handle their own auth)
+  // 2. Iframe requests (they use localStorage, not cookies)
+  const isApiRoute = request.nextUrl.pathname.startsWith('/api/')
+  
+  if (!isIframeRequest && !isApiRoute) {
     const {
       data: { user },
     } = await supabase.auth.getUser()
