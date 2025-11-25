@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     return [
       {
         // Allow embedding in iframes from any origin
-        source: '/widget',
+        source: '/widget/:path*',
         headers: [
           {
             key: 'X-Frame-Options',
@@ -18,6 +18,22 @@ const nextConfig: NextConfig = {
           {
             key: 'Content-Security-Policy',
             value: "frame-ancestors *",
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+          {
+            key: 'Access-Control-Allow-Credentials',
+            value: 'true',
           },
         ],
       },

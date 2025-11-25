@@ -23,20 +23,17 @@ First, deploy your Next.js application to a hosting platform (Vercel, Netlify, e
 
 Example: `https://your-dental-mentor-app.vercel.app`
 
-### Step 2: Add Container to Your Page
+### Step 2: Add Widget Code to Footer (Recommended for CSP)
 
-In Squarespace, add a **Code Block** to the page where you want the chatbot to appear:
+To avoid Content Security Policy issues, add the configuration to the **Footer Code Injection**:
 
-1. **Edit the page** where you want the widget
-2. **Add a Code Block** (click + → More → Code)
-3. **Paste this HTML:**
+1. **Go to Settings → Advanced → Code Injection**
+2. **Add this to the FOOTER section:**
 
 ```html
-<div id="dental-mentor-widget" style="width: 100%; height: 800px; min-height: 800px;"></div>
-
 <script>
   window.DentalMentorConfig = {
-    baseUrl: 'https://your-dental-mentor-app.vercel.app', // Replace with your deployed URL
+    baseUrl: 'https://your-dental-mentor-app.vercel.app',
     containerId: 'dental-mentor-widget',
     width: '100%',
     height: '800px'
@@ -45,16 +42,28 @@ In Squarespace, add a **Code Block** to the page where you want the chatbot to a
 <script src="https://your-dental-mentor-app.vercel.app/embed.js"></script>
 ```
 
-**Important:** Replace `https://your-dental-mentor-app.vercel.app` with your actual deployed URL in BOTH places.
+3. **Click Save**
 
-### Step 3: Test the Widget
+### Step 3: Add Container to Your Page
+
+1. **Edit the page** where you want the widget
+2. **Add a Code Block** (click + → More → Code)
+3. **Paste ONLY the container div:**
+
+```html
+<div id="dental-mentor-widget" style="width: 100%; height: 800px; min-height: 800px;"></div>
+```
+
+**Important:** Replace `https://your-dental-mentor-app.vercel.app` with your actual deployed URL.
+
+### Step 4: Test the Widget
 
 1. **Save your page** in Squarespace
 2. **View the page** (you may need to refresh)
 3. **Open browser console** (F12) to check for any errors
 4. The chatbot should load directly in the container
 
-**Note:** The script is now included directly in the Code Block (Step 2) for better compatibility with Squarespace. You don't need to add anything to Footer Code Injection unless you want the widget on multiple pages.
+**Note:** By putting the script in Footer Code Injection instead of the Code Block, we avoid Content Security Policy (CSP) issues that Squarespace might have with inline scripts.
 
 ## Configuration Options
 
@@ -204,11 +213,10 @@ If you encounter any issues:
 
 ## Example: Complete Integration
 
-Here's a complete example for a Squarespace Code Block (all in one):
+Here's a complete example for Squarespace:
 
+**In Footer Code Injection (Settings → Advanced → Code Injection → Footer):**
 ```html
-<div id="dental-mentor-widget" style="width: 100%; height: 800px; min-height: 800px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);"></div>
-
 <script>
   window.DentalMentorConfig = {
     baseUrl: 'https://dental-mentor-ai.vercel.app',
@@ -220,7 +228,12 @@ Here's a complete example for a Squarespace Code Block (all in one):
 <script src="https://dental-mentor-ai.vercel.app/embed.js"></script>
 ```
 
-**That's it!** Just paste this into a Code Block on your Squarespace page and replace the URLs with your deployed app URL.
+**In your page's Code Block:**
+```html
+<div id="dental-mentor-widget" style="width: 100%; height: 800px; min-height: 800px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);"></div>
+```
+
+**That's it!** Replace the URLs with your deployed app URL and the widget will load without CSP issues.
 
 ## Next Steps
 
