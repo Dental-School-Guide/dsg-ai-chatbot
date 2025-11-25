@@ -144,6 +144,11 @@
     window.addEventListener('message', function(event) {
       console.log('Message from iframe:', event.data);
     });
+    
+    // Log iframe status
+    console.log('Parent page loaded. Iframe should be loading...');
+    console.log('Check the browser console for "[Supabase] Running in iframe context" message');
+    console.log('If you see that message, localStorage is being used correctly');
   </script>
 </body>
 </html>

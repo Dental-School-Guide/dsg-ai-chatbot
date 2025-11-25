@@ -6,6 +6,9 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
+  // Check if this is an iframe request (won't have cookies)
+  const isIframeRequest = request.headers.get('sec-fetch-dest') === 'iframe'
+  
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -15,6 +18,10 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
+          // Skip setting cookies for iframe requests since they won't work anyway
+          if (isIframeRequest) {
+            return
+          }
           cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
@@ -34,9 +41,6 @@ export async function updateSession(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
-  // Check if request is from an iframe by looking at Sec-Fetch-Dest header
-  const isIframeRequest = request.headers.get('sec-fetch-dest') === 'iframe'
   
   if (
     !user &&
