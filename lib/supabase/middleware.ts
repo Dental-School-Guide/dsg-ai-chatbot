@@ -38,28 +38,32 @@ export async function updateSession(request: NextRequest) {
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/signup') &&
-    !request.nextUrl.pathname.startsWith('/forgot-password') &&
-    !request.nextUrl.pathname.startsWith('/reset-password')
-  ) {
-    // Redirect to appropriate login page based on current path
-    const url = request.nextUrl.clone()
+  // For iframe requests, skip server-side auth check since they use localStorage
+  // The client-side will handle authentication
+  if (!isIframeRequest) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
     
-    // If user is on widget route, redirect to widget login
-    if (request.nextUrl.pathname.startsWith('/widget')) {
-      url.pathname = '/widget/login'
-    } else {
-      url.pathname = '/login'
+    if (
+      !user &&
+      !request.nextUrl.pathname.startsWith('/login') &&
+      !request.nextUrl.pathname.startsWith('/signup') &&
+      !request.nextUrl.pathname.startsWith('/forgot-password') &&
+      !request.nextUrl.pathname.startsWith('/reset-password')
+    ) {
+      // Redirect to appropriate login page based on current path
+      const url = request.nextUrl.clone()
+      
+      // If user is on widget route, redirect to widget login
+      if (request.nextUrl.pathname.startsWith('/widget')) {
+        url.pathname = '/widget/login'
+      } else {
+        url.pathname = '/login'
+      }
+      
+      return NextResponse.redirect(url)
     }
-    
-    return NextResponse.redirect(url)
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're

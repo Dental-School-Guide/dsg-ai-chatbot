@@ -42,10 +42,16 @@ function LoginForm() {
       }
 
       if (data.user) {
-        router.push('/')
-        router.refresh()
+        console.log('[Login] User authenticated:', data.user.email)
+        
+        // Wait a bit for session to be saved to storage
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        // Force a hard navigation instead of client-side routing
+        window.location.href = '/'
       }
     } catch (err) {
+      console.error('[Login] Error:', err)
       setError('An unexpected error occurred')
       setLoading(false)
     }
