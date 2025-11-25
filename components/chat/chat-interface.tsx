@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ChatMessage } from './chat-message';
 import { ChatComposer } from './chat-composer';
 import { EssayUpload } from '../essay-upload';
+import { apiFetch } from '@/lib/api-client';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -82,7 +83,7 @@ export function ChatInterface({ conversationId, onConversationCreated, onConvers
   const loadConversation = async (convId: string) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/conversations/${convId}`);
+      const response = await apiFetch(`/api/conversations/${convId}`);
       if (response.ok) {
         const data = await response.json();
         // Convert Voltage message format to our format
@@ -150,7 +151,7 @@ export function ChatInterface({ conversationId, onConversationCreated, onConvers
       const apiMessages = [{ role: 'user' as const, content: userMessage.content }];
 
       // Call the chat API
-      const response = await fetch('/api/chat', {
+      const response = await apiFetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -218,7 +219,7 @@ export function ChatInterface({ conversationId, onConversationCreated, onConvers
       // Auto-generate title after second user message
       if (newUserMessageCount === 2 && convId) {
         // Generate title in background
-        fetch(`/api/conversations/${convId}/generate-title`, {
+        apiFetch(`/api/conversations/${convId}/generate-title`, {
           method: 'POST',
         }).then(response => {
           if (response.ok) {

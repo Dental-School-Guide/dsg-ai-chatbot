@@ -71,15 +71,46 @@ export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
   try {
-    // Verify authentication
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Verify authentication - check both cookies and Authorization header
+    const authHeader = req.headers.get('authorization');
+    let user;
+    let supabase;
+    
+    if (authHeader?.startsWith('Bearer ')) {
+      // For iframe context with localStorage, use service client with access token
+      const token = authHeader.substring(7);
+      supabase = createServiceClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      const { data: { user: tokenUser }, error: tokenError } = await supabase.auth.getUser(token);
+      
+      if (tokenError || !tokenUser) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      user = tokenUser;
+    } else {
+      // For normal context with cookies
+      supabase = await createClient();
+      const { data: { user: cookieUser }, error: authError } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      if (authError || !cookieUser) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      user = cookieUser;
     }
 
     const body = await req.json();

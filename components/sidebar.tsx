@@ -7,6 +7,7 @@ import { Download, Trash2, Plus, Sparkles, Search, Lightbulb, GraduationCap, Roc
 import Image from "next/image";
 import { useState, useEffect, forwardRef, useImperativeHandle, memo } from "react";
 import { toast } from "sonner";
+import { apiFetch } from "@/lib/api-client";
 
 interface Conversation {
   id: string;
@@ -90,7 +91,7 @@ const SidebarComponent = forwardRef<SidebarRef, SidebarProps>(({ className, acti
 
   const fetchConversations = async () => {
     try {
-      const response = await fetch('/api/conversations');
+      const response = await apiFetch('/api/conversations');
       if (response.ok) {
         const data = await response.json();
         setConversations(data.conversations || []);
@@ -125,7 +126,7 @@ const SidebarComponent = forwardRef<SidebarRef, SidebarProps>(({ className, acti
 
     try {
       // Delete the current conversation
-      const response = await fetch(`/api/conversations/${activeConversationId}`, {
+      const response = await apiFetch(`/api/conversations/${activeConversationId}`, {
         method: 'DELETE',
       });
       
@@ -162,7 +163,7 @@ const SidebarComponent = forwardRef<SidebarRef, SidebarProps>(({ className, acti
     setConversations(prev => prev.filter(conv => conv.id !== id));
     
     try {
-      const response = await fetch(`/api/conversations/${id}`, {
+      const response = await apiFetch(`/api/conversations/${id}`, {
         method: 'DELETE',
       });
       if (response.ok) {
@@ -212,7 +213,7 @@ const SidebarComponent = forwardRef<SidebarRef, SidebarProps>(({ className, acti
     setRenamingId(null);
     
     try {
-      const response = await fetch(`/api/conversations/${id}`, {
+      const response = await apiFetch(`/api/conversations/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: renameValue }),
