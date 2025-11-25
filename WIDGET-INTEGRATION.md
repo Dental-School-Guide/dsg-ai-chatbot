@@ -29,23 +29,15 @@ In Squarespace, add a **Code Block** to the page where you want the chatbot to a
 
 1. **Edit the page** where you want the widget
 2. **Add a Code Block** (click + → More → Code)
-3. **Add this HTML:**
+3. **Paste this HTML:**
 
 ```html
-<div id="dental-mentor-widget" style="width: 100%; height: 800px;"></div>
-```
+<div id="dental-mentor-widget" style="width: 100%; height: 800px; min-height: 800px;"></div>
 
-### Step 3: Add Script to Footer
-
-1. **Go to Settings → Advanced → Code Injection**
-2. **Add the following code to the FOOTER section:**
-
-```html
-<!-- Dental Mentor AI Widget Configuration -->
 <script>
   window.DentalMentorConfig = {
     baseUrl: 'https://your-dental-mentor-app.vercel.app', // Replace with your deployed URL
-    containerId: 'dental-mentor-widget', // Must match the div id above
+    containerId: 'dental-mentor-widget',
     width: '100%',
     height: '800px'
   };
@@ -53,11 +45,16 @@ In Squarespace, add a **Code Block** to the page where you want the chatbot to a
 <script src="https://your-dental-mentor-app.vercel.app/embed.js"></script>
 ```
 
-3. **Click Save**
+**Important:** Replace `https://your-dental-mentor-app.vercel.app` with your actual deployed URL in BOTH places.
 
-### Step 4: Test the Widget
+### Step 3: Test the Widget
 
-Visit your Squarespace page and the chatbot should load directly in the container you created.
+1. **Save your page** in Squarespace
+2. **View the page** (you may need to refresh)
+3. **Open browser console** (F12) to check for any errors
+4. The chatbot should load directly in the container
+
+**Note:** The script is now included directly in the Code Block (Step 2) for better compatibility with Squarespace. You don't need to add anything to Footer Code Injection unless you want the widget on multiple pages.
 
 ## Configuration Options
 
@@ -207,15 +204,11 @@ If you encounter any issues:
 
 ## Example: Complete Integration
 
-Here's a complete example for a Squarespace page:
+Here's a complete example for a Squarespace Code Block (all in one):
 
-**Step 1: Add Code Block to your page:**
 ```html
-<div id="dental-mentor-widget" style="width: 100%; height: 800px; border-radius: 12px; overflow: hidden;"></div>
-```
+<div id="dental-mentor-widget" style="width: 100%; height: 800px; min-height: 800px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);"></div>
 
-**Step 2: Add to Footer Code Injection:**
-```html
 <script>
   window.DentalMentorConfig = {
     baseUrl: 'https://dental-mentor-ai.vercel.app',
@@ -227,15 +220,7 @@ Here's a complete example for a Squarespace page:
 <script src="https://dental-mentor-ai.vercel.app/embed.js"></script>
 ```
 
-**Optional: Add custom styling:**
-```html
-<style>
-  #dental-mentor-widget {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
-  }
-</style>
-```
+**That's it!** Just paste this into a Code Block on your Squarespace page and replace the URLs with your deployed app URL.
 
 ## Next Steps
 
