@@ -376,7 +376,7 @@ const SidebarComponent = forwardRef<SidebarRef, SidebarProps>(({ className, acti
       </div>
 
       {/* Chat History - Takes remaining space (row 4) with its own scroll */}
-      <div className="min-h-0 h-[46vh] px-4 pb-2 overflow-hidden">
+      <div className="min-h-0 h-[50%] px-4 pb-2 overflow-hidden">
         <div className="flex flex-col h-full min-h-0 overflow-hidden rounded-2xl border border-[--dsg-edge] dsg-panel-2-gradient shadow-sm">
 
           <div className="flex-shrink-0 border-b border-[--dsg-edge] bg-transparent px-3.5 py-2">
