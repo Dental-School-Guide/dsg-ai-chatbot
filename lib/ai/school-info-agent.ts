@@ -121,7 +121,7 @@ You have access to conversation history. Use it intelligently:
 
 Always be helpful, accurate, and base your answers on the database information.
 If information is not in the database, be honest about it.`,
-    model: google('gemini-3-pro-preview'),
+    model: google('gemini-2.5-flash'),
     tools: [googleSheetsTool, schoolWebsiteSearchTool],
   });
 
