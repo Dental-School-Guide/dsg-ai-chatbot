@@ -12,6 +12,7 @@ export function HomeContent() {
   const sidebarRef = useRef<SidebarRef>(null);
   const [activeConversationId, setActiveConversationId] = useState<string | undefined>();
   const [agentMode, setAgentMode] = useState<string | null>(null);
+  const [isInIframe, setIsInIframe] = useState(false);
 
   const handleAgentModeChange = (mode: string | null) => {
     setAgentMode(mode);
@@ -21,30 +22,47 @@ export function HomeContent() {
     }
   };
 
-  // Load conversation from URL on mount
+  // Detect iframe and (when not embedded) load conversation from URL on mount
   useEffect(() => {
-    const convId = searchParams.get('c');
-    if (convId) {
-      setActiveConversationId(convId);
+    if (typeof window === "undefined") return;
+
+    const inIframe = window.self !== window.top;
+    setIsInIframe(inIframe);
+
+    if (!inIframe) {
+      const convId = searchParams.get("c");
+      if (convId) {
+        setActiveConversationId(convId);
+      }
     }
   }, [searchParams]);
 
   const handleConversationSelect = (conversationId: string) => {
     setActiveConversationId(conversationId);
-    // Update URL with conversation ID
-    router.push(`/?c=${conversationId}`);
+
+    // When not embedded, keep URL in sync for sharable links
+    if (!isInIframe) {
+      router.push(`/?c=${conversationId}`);
+    }
   };
 
   const handleNewChat = () => {
     setActiveConversationId(undefined);
-    // Clear URL parameter
-    router.push('/');
+
+    // Only manipulate URL in normal (non-iframe) usage
+    if (!isInIframe) {
+      router.push("/");
+    }
   };
 
   const handleConversationCreated = (conversationId: string) => {
     setActiveConversationId(conversationId);
-    // Update URL with new conversation ID
-    router.push(`/?c=${conversationId}`);
+
+    // Only update URL when not embedded
+    if (!isInIframe) {
+      router.push(`/?c=${conversationId}`);
+    }
+
     // Refresh sidebar to show new conversation
     sidebarRef.current?.refresh();
   };
