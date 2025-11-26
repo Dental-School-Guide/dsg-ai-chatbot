@@ -279,10 +279,9 @@ const SidebarComponent = forwardRef<SidebarRef, SidebarProps>(({ className, acti
   return (
     <aside
       className={cn(
-        "bubble-skin-user grid h-full w-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)_auto] overflow-hidden rounded-xl border border-[--dsg-edge] dsg-panel-gradient text-[--dsg-text]",
+        "relative bubble-skin-user flex h-full w-full min-h-0 flex-col overflow-hidden rounded-xl border border-[--dsg-edge] dsg-panel-gradient text-[--dsg-text]",
         className
       )}
-      style={{ gridTemplateRows: "auto auto auto minmax(0,1fr) auto" }}
     >
       {/* Header - Fixed at top */}
       <div className="flex-shrink-0 p-4">
@@ -376,7 +375,7 @@ const SidebarComponent = forwardRef<SidebarRef, SidebarProps>(({ className, acti
       </div>
 
       {/* Chat History - Takes remaining space (row 4) with its own scroll */}
-      <div className="min-h-0 h-[50%] px-4 pb-2 overflow-hidden">
+      <div className="min-h-0 px-4 pb-2 overflow-hidden h-[calc(100vh-386px)]">
         <div className="flex flex-col h-full min-h-0 overflow-hidden rounded-2xl border border-[--dsg-edge] dsg-panel-2-gradient shadow-sm">
 
           <div className="flex-shrink-0 border-b border-[--dsg-edge] bg-transparent px-3.5 py-2">
