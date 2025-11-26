@@ -254,21 +254,28 @@ export async function POST(req: NextRequest) {
                 if (linksError) console.error('[Chat API] Error fetching links:', linksError);
 
                 if (contextLinks && contextLinks.length > 0) {
-                  // Format sources section
-                  sourcesText = '\n\n---\n\n**📚 Sources:**\n' + 
-                    contextLinks.map(link => `- [${link.context_name}](${link.link})`).join('\n');
-                  
-                  console.log('[Chat API] Appending sources:', sourcesText);
-                  
-                  // Append sources to full message for saving
-                  fullAssistantMessage += sourcesText;
-                  
-                  // Send sources as text
-                  const sourcesData = JSON.stringify({ 
-                    type: 'text', 
-                    content: sourcesText 
-                  });
-                  controller.enqueue(encoder.encode(`data: ${sourcesData}\n\n`));
+                  // Only keep sources that point to the public Dental School Guide site
+                  const allowedLinks = contextLinks.filter((link: any) => 
+                    typeof link.link === 'string' && link.link.startsWith('https://www.dentalschoolguide.com/')
+                  );
+
+                  if (allowedLinks.length > 0) {
+                    // Format sources section from allowed links only
+                    sourcesText = '\n\n---\n\n**📚 Sources:**\n' + 
+                      allowedLinks.map(link => `- [${link.context_name}](${link.link})`).join('\n');
+                    
+                    console.log('[Chat API] Appending sources:', sourcesText);
+                    
+                    // Append sources to full message for saving
+                    fullAssistantMessage += sourcesText;
+                    
+                    // Send sources as text
+                    const sourcesData = JSON.stringify({ 
+                      type: 'text', 
+                      content: sourcesText 
+                    });
+                    controller.enqueue(encoder.encode(`data: ${sourcesData}\n\n`));
+                  }
                 }
               }
 
