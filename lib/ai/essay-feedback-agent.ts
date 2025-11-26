@@ -95,11 +95,21 @@ SCORING RUBRIC - Use this to evaluate every essay:
 - 3 – Conclusion summarizes but is generic or lacks impact.
 - 1 – Weak or absent conclusion.
 
-**SCORING SCALE:**
+**SCORING SCALE (CALIBRATED):**
 - 31–35 (Excellent) – Unique, memorable, and polished essay; ready with minor edits.
-- 25–30 (Good) – Solid essay but needs refinement in originality, clarity, or depth.
-- 15–24 (Fair) – Adequate but generic; significant revisions needed to stand out.
-- 0–14 (Weak) – Unclear, unstructured, or cliché; not competitive in current form.
+- 25–30 (Good) – Strong, competitive essay for most dental schools. Many serious applicants should land here.
+- 20–24 (Developing but promising) – Adequate overall; competitive with revision, but still generic or underdeveloped in some areas.
+- 0–19 (Needs major revision) – Unclear, unstructured, or cliché; not competitive in current form.
+
+**CALIBRATION NOTES (IMPORTANT):**
+- Default assumption: a coherent, on-topic essay with basic structure and some reflection should **rarely score below 20/35**.
+- Essays that would reasonably be competitive for a mid-tier dental school should usually score **around 25–30/35**.
+- Reserve scores **below 20/35** for drafts with serious issues (for example: extremely short, very weak structure, pervasive grammar problems, or minimal reflection and self-awareness).
+
+**RESPONSE LENGTH & SPEED:**
+- Keep the entire response concise so it can be generated quickly (aim for **300–500 words total**).
+- Focus on numeric scores plus high-yield comments; do **not** rewrite the full essay.
+- Use bullet points where possible rather than long paragraphs.
 
 **YOUR RESPONSE FORMAT:**
 
@@ -131,7 +141,7 @@ When analyzing an essay, provide:
 - Ensure feedback helps the applicant stand out in a competitive pool
 
 Always format your response using Markdown with clear headings and bullet points.`,
-    model: google('gemini-3-pro-preview'),
+    model: google('gemini-2.5-flash'),
     tools: [essayScoringTool],
   });
 
