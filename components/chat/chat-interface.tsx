@@ -44,10 +44,16 @@ export function ChatInterface({ conversationId, onConversationCreated, onConvers
   const [currentConversationId, setCurrentConversationId] = useState<string | undefined>(conversationId);
   const [userMessageCount, setUserMessageCount] = useState(0);
   const [showEssayUpload, setShowEssayUpload] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
   };
 
   useEffect(() => {
@@ -246,7 +252,7 @@ export function ChatInterface({ conversationId, onConversationCreated, onConvers
   return (
     <div className="mt-4 flex min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[--dsg-edge] dsg-chat-bg p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-        <div className="flex-1 overflow-y-auto space-y-5 pr-2 scrollbar-themed">
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto space-y-5 pr-2 scrollbar-themed">
           {/* Show Essay Upload if in Essay feedback mode and no messages yet */}
           {showEssayUpload && (
             <div className="space-y-4">
@@ -280,7 +286,7 @@ export function ChatInterface({ conversationId, onConversationCreated, onConvers
               </p>
             </ChatMessage>
           )}
-          <div ref={messagesEndRef} />
+          <div />
         </div>
       </div>
 
