@@ -59,7 +59,11 @@ function inferAgentModeFromMessage(content: string): string | null {
     'average gpa',
   ];
 
-  if (schoolKeywords.some((kw) => text.includes(kw))) {
+  // Only infer School Info mode when the user is clearly asking about
+  // stats/requirements *for a specific school*, not general DAT/GPA topics.
+  const mentionsSchoolEntity = /\b(school|university|college|dental school|school of dentistry|dental program|dds program|dmd program)\b/.test(text);
+
+  if (mentionsSchoolEntity && schoolKeywords.some((kw) => text.includes(kw))) {
     return 'School Info';
   }
 
