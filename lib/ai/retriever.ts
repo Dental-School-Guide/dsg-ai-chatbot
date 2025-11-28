@@ -51,11 +51,32 @@ export class LessonRetriever extends BaseRetriever {
       console.log(`[Retriever] Found ${data.length} results`);
       console.log('[Retriever] First result raw data:', JSON.stringify(data[0], null, 2));
 
+      let rows = data;
+      const isDiscountQuery = /discount|promo code|coupon|promo|code/i.test(query);
+      if (isDiscountQuery) {
+        const discountRows = data.filter((item: any) => {
+          const text = `${item.content_chunk || ''} ${(item.metadata?.title || '')} ${(item.metadata?.topic || '')} ${(item.source_name || '')}`.toLowerCase();
+          return (
+            text.includes('discount') ||
+            text.includes('promo') ||
+            text.includes('coupon') ||
+            text.includes('code')
+          );
+        });
+
+        if (discountRows.length > 0) {
+          console.log('[Retriever] Using filtered discount-related rows:', discountRows.length);
+          rows = discountRows;
+        } else {
+          console.log('[Retriever] No explicit discount rows found; using full result set');
+        }
+      }
+
       // Track sources if context is provided
       if (options?.context) {
         options.context.set(
           'sources',
-          data.map((item: any) => ({
+          rows.map((item: any) => ({
             id: item.id,
             context_id: item.context_id,
             source_name: item.source_name,
@@ -67,7 +88,7 @@ export class LessonRetriever extends BaseRetriever {
       }
 
       // Format and return results with source information from context_links
-      const results = data.map((item: any, index: number) => {
+      const results = rows.map((item: any, index: number) => {
         // Use source_name from context_links table, fallback to metadata or 'Knowledge Base'
         const sourceName = item.source_name || item.metadata?.title || item.metadata?.topic || 'Knowledge Base';
         const sourceUrl = item.source_url || '';

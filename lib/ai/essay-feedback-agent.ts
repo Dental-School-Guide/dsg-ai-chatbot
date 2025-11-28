@@ -141,7 +141,7 @@ When analyzing an essay, provide:
 - Ensure feedback helps the applicant stand out in a competitive pool
 
 Always format your response using Markdown with clear headings and bullet points.`,
-    model: google('gemini-3-pro-preview'),
+    model: google('gemini-2.5-flash'),
     tools: [essayScoringTool],
   });
 

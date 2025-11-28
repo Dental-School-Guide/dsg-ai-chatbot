@@ -267,18 +267,23 @@ export async function POST(req: NextRequest) {
                     // Format sources section from allowed links only
                     sourcesText = '\n\n---\n\n**📚 Sources:**\n' + 
                       allowedLinks.map(link => `- [${link.context_name}](${link.link})`).join('\n');
-                    
-                    console.log('[Chat API] Appending sources:', sourcesText);
-                    
-                    // Append sources to full message for saving
-                    fullAssistantMessage += sourcesText;
-                    
-                    // Send sources as text
-                    const sourcesData = JSON.stringify({ 
-                      type: 'text', 
-                      content: sourcesText 
-                    });
-                    controller.enqueue(encoder.encode(`data: ${sourcesData}\n\n`));
+
+                    // If the assistant message already contains a Sources section, don't append another one
+                    if (fullAssistantMessage.includes('📚 Sources:')) {
+                      console.log('[Chat API] Sources already present in assistant message, skipping append');
+                    } else {
+                      console.log('[Chat API] Appending sources:', sourcesText);
+
+                      // Append sources to full message for saving
+                      fullAssistantMessage += sourcesText;
+
+                      // Send sources as text
+                      const sourcesData = JSON.stringify({ 
+                        type: 'text', 
+                        content: sourcesText 
+                      });
+                      controller.enqueue(encoder.encode(`data: ${sourcesData}\n\n`));
+                    }
                   }
                 }
               }
