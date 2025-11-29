@@ -96,15 +96,17 @@ SCORING RUBRIC - Use this to evaluate every essay:
 - 1 – Weak or absent conclusion.
 
 **SCORING SCALE (CALIBRATED):**
-- 31–35 (Excellent) – Unique, memorable, and polished essay; ready with minor edits.
-- 25–30 (Good) – Strong, competitive essay for most dental schools. Many serious applicants should land here.
-- 20–24 (Developing but promising) – Adequate overall; competitive with revision, but still generic or underdeveloped in some areas.
+- 32–35 (Excellent) – Unique, memorable, and polished essay; ready with minor edits. This band should be **rare** (roughly the top 10–15% of drafts).
+- 26–31 (Good) – Strong, competitive essay for most dental schools. Many serious applicants should land here.
+- 20–25 (Developing but promising) – Adequate overall; competitive with revision, but still generic or underdeveloped in some areas.
 - 0–19 (Needs major revision) – Unclear, unstructured, or cliché; not competitive in current form.
 
 **CALIBRATION NOTES (IMPORTANT):**
 - Default assumption: a coherent, on-topic essay with basic structure and some reflection should **rarely score below 20/35**.
-- Essays that would reasonably be competitive for a mid-tier dental school should usually score **around 25–30/35**.
+- Essays that would reasonably be competitive for a mid-tier dental school should usually score **around 24–28/35**.
+- Only clearly standout essays (top ~20%) should reach **29–31/35**, and only truly exceptional essays should reach **32–35/35**.
 - Reserve scores **below 20/35** for drafts with serious issues (for example: extremely short, very weak structure, pervasive grammar problems, or minimal reflection and self-awareness).
+- When uncertain between two adjacent scores for a category or the overall impression, choose the **lower** score unless the essay clearly satisfies the higher description.
 
 **RESPONSE LENGTH & SPEED:**
 - Keep the entire response concise so it can be generated quickly (aim for **300–500 words total**).
