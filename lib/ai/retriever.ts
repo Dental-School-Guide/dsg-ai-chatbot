@@ -27,8 +27,13 @@ export class LessonRetriever extends BaseRetriever {
     try {
       // Generate embedding for the query using Google
       const { embedding } = await embed({
-        model: google.textEmbeddingModel('text-embedding-004'),
+        model: google.textEmbeddingModel('gemini-embedding-001'),
         value: query,
+        providerOptions: {
+          google: {
+            outputDimensionality: 768,
+          },
+        },
       });
 
       // Search for similar embeddings in Supabase using pgvector
