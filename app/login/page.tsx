@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 function LoginForm() {
@@ -11,18 +10,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
-  const searchParams = useSearchParams()
   const supabase = createClient()
-
-  // Check if this is a password reset redirect
-  useEffect(() => {
-    const code = searchParams.get('code')
-    if (code) {
-      // Redirect to reset-password page with the code
-      router.push(`/reset-password?code=${code}`)
-    }
-  }, [searchParams, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -1,97 +1,97 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 function ResetPasswordForm() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const supabase = createClient()
+
+  // Step 1 inputs
+  const [email, setEmail] = useState(searchParams.get('email') ?? '')
+  const [otp, setOtp] = useState('')
+
+  // Step 2 inputs
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [validSession, setValidSession] = useState(false)
-  const [verifying, setVerifying] = useState(true)
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const supabase = createClient()
+  // After verifying OTP we get a recovery session and can update the password
+  const [otpVerified, setOtpVerified] = useState(false)
 
-  useEffect(() => {
-    // Check if user has a valid recovery session or verify the code
-    const checkSession = async () => {
-      const code = searchParams.get('code')
-      
-      // If there's a code in the URL, verify it
-      if (code) {
-        try {
-          const { error: verifyError } = await supabase.auth.verifyOtp({
-            token_hash: code,
-            type: 'recovery'
-          })
-          
-          if (verifyError) {
-            setError('Invalid or expired reset link. Please request a new one.')
-            setVerifying(false)
-            return
-          }
-          
-          setValidSession(true)
-          setVerifying(false)
-        } catch (err) {
-          setError('Failed to verify reset link. Please request a new one.')
-          setVerifying(false)
-        }
-      } else {
-        // No code, check for existing session
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session) {
-          setValidSession(true)
-        } else {
-          setError('Invalid or expired reset link. Please request a new one.')
-        }
-        setVerifying(false)
-      }
-    }
-    checkSession()
-  }, [supabase.auth, searchParams])
-
-  const handleResetPassword = async (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    if (!email) {
+      setError('Please enter your email')
+      return
+    }
+    if (!/^\d{6}$/.test(otp.trim())) {
+      setError('Please enter the 6-digit code from your email')
+      return
+    }
+
     setLoading(true)
-
-    // Validate passwords match
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      setLoading(false)
-      return
-    }
-
-    // Validate password length
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long')
-      setLoading(false)
-      return
-    }
-
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: password
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token: otp.trim(),
+        type: 'recovery',
       })
 
-      if (error) {
-        setError(error.message)
+      if (verifyError) {
+        console.error('[ResetPassword] verifyOtp failed:', verifyError)
+        setError(verifyError.message || 'Invalid or expired code. Please try again.')
         setLoading(false)
         return
       }
 
+      setOtpVerified(true)
+      setLoading(false)
+    } catch (err) {
+      console.error('[ResetPassword] verifyOtp threw:', err)
+      setError('Failed to verify code. Please try again.')
+      setLoading(false)
+    }
+  }
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({ password })
+
+      if (updateError) {
+        setError(updateError.message)
+        setLoading(false)
+        return
+      }
+
+      // Sign out the recovery session so the user must log in with the new password
+      await supabase.auth.signOut()
+
       setSuccess(true)
       setLoading(false)
-      
-      // Redirect to login after 2 seconds
+
       setTimeout(() => {
         router.push('/login')
       }, 2000)
@@ -99,24 +99,6 @@ function ResetPasswordForm() {
       setError('An unexpected error occurred')
       setLoading(false)
     }
-  }
-
-  if (verifying) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[--bg] p-4">
-        <div className="w-full max-w-md space-y-8 rounded-2xl border border-[--edge] bg-[--panel] p-8 shadow-[0_24px_80px_-48px_rgba(0,0,0,0.6)]">
-          <div className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-[--dsg-edge] border-t-[--dsg-gold]"></div>
-            </div>
-            <h1 className="text-2xl font-bold text-[--text]">Verifying...</h1>
-            <p className="mt-2 text-sm text-[--text-secondary]">
-              Please wait while we verify your reset link.
-            </p>
-          </div>
-        </div>
-      </div>
-    )
   }
 
   if (success) {
@@ -149,50 +131,91 @@ function ResetPasswordForm() {
     )
   }
 
-  if (!validSession && error) {
+  // Step 1: enter email + OTP
+  if (!otpVerified) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[--bg] p-4">
         <div className="w-full max-w-md space-y-8 rounded-2xl border border-[--edge] bg-[--panel] p-8 shadow-[0_24px_80px_-48px_rgba(0,0,0,0.6)]">
           <div className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
-              <svg
-                className="h-6 w-6 text-red-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold text-[--text]">Invalid Link</h1>
+            <h1 className="text-3xl font-bold text-[--text]">Enter Reset Code</h1>
             <p className="mt-2 text-sm text-[--text-secondary]">
-              {error}
+              We sent a 6-digit code to your email. Enter it below to continue.
             </p>
-            <div className="mt-6 space-y-3">
+          </div>
+
+          <form onSubmit={handleVerifyOtp} className="mt-8 space-y-6">
+            {error && (
+              <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-500">
+                {error}
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-[--text]">
+                Email address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1 block w-full rounded-lg border border-[--edge] bg-[--bg] px-3 py-2 text-[--text] placeholder-[--text-secondary] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="you@example.com"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="otp" className="block text-sm font-medium text-[--text]">
+                6-digit code
+              </label>
+              <input
+                id="otp"
+                name="otp"
+                type="text"
+                inputMode="numeric"
+                pattern="\d{6}"
+                maxLength={6}
+                autoComplete="one-time-code"
+                required
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                className="mt-1 block w-full rounded-lg border border-[--edge] bg-[--bg] px-3 py-2 text-center text-2xl tracking-[0.5em] text-[--text] placeholder-[--text-secondary] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="000000"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-lg bg-[#f6d43f] px-4 py-2 text-sm font-semibold text-black hover:bg-[#f6d43f]/90 focus:outline-none focus:ring-2 focus:ring-[#f6d43f] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {loading ? 'Verifying...' : 'Verify code'}
+            </button>
+
+            <div className="flex items-center justify-between text-sm">
               <Link
                 href="/forgot-password"
-                className="block w-full rounded-lg bg-[#f6d43f] px-4 py-2 text-sm font-semibold text-black hover:bg-[#f6d43f]/90 transition-colors"
+                className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
               >
-                Request new reset link
+                Resend code
               </Link>
               <Link
                 href="/login"
-                className="block text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors"
+                className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
               >
                 ← Back to login
               </Link>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     )
   }
 
+  // Step 2: enter new password
   return (
     <div className="flex min-h-screen items-center justify-center bg-[--bg] p-4">
       <div className="w-full max-w-md space-y-8 rounded-2xl border border-[--edge] bg-[--panel] p-8 shadow-[0_24px_80px_-48px_rgba(0,0,0,0.6)]">
@@ -289,7 +312,7 @@ function ResetPasswordForm() {
 
           <button
             type="submit"
-            disabled={loading || !validSession}
+            disabled={loading}
             className="w-full rounded-lg bg-[#f6d43f] px-4 py-2 text-sm font-semibold text-black hover:bg-[#f6d43f]/90 focus:outline-none focus:ring-2 focus:ring-[#f6d43f] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? 'Resetting password...' : 'Reset password'}
