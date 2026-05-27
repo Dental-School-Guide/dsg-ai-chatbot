@@ -5,6 +5,16 @@ const nextConfig: NextConfig = {
   turbopack: {
     // Empty config to work with Turbopack
   },
+  serverExternalPackages: [
+    "pino",
+    "pino-pretty",
+    "thread-stream",
+    "pino-worker",
+    "pino-file",
+    "@voltagent/logger",
+    "@voltagent/core",
+    "@voltagent/supabase",
+  ],
   async headers() {
     return [
       {
