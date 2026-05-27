@@ -84,7 +84,7 @@ export function createVolunteerAgent() {
 **IMPORTANT:** Write the complete URL in your response text. Do not reference variables - write the actual URL string.
 
 Always be helpful, encouraging, and make it easy for students to take action by providing clear links.`,
-    model: google('gemini-3-pro-preview'),
+    model: google('gemini-3.5-flash'),
     tools: [volunteerOpportunitiesTool],
   });
 

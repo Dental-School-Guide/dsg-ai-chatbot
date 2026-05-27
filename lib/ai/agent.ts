@@ -62,7 +62,7 @@ CRITICAL RULES FOR ANSWERING:
 - DO NOT reference variables or placeholders - write the actual URL string
 - This ensures links are saved in conversation history and persist across sessions
 - All links will appear in violet color for visibility`,
-    model: google('gemini-3-pro-preview'),
+    model: google('gemini-3.5-flash'),
     retriever: retriever, // Always-on search - retrieves context before every response
     tools: [googleSheetsTool, faqTool, volunteerOpportunitiesTool], // School info, FAQ, and volunteer opportunities
   });

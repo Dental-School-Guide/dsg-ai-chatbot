@@ -94,7 +94,7 @@ Ready for the next question?
 \`\`\`
 `,
     
-    model: google('gemini-3-pro-preview'),
+    model: google('gemini-3.5-flash'),
     tools: [googleDocsTool],
   });
 
