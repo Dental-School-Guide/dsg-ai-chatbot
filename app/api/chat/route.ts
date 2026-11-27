@@ -224,6 +224,18 @@ export async function POST(req: NextRequest) {
         try {
           for await (const chunk of result.fullStream) {
             // Handle different chunk types
+            if (chunk.type === 'error') {
+              // Surface model/API failures instead of leaving an empty reply bubble
+              const err: any = (chunk as any).error;
+              const detail = err?.message || String(err);
+              console.error('[Chat API] Model error:', detail, err?.statusCode ?? '', err?.responseBody ?? '');
+              const data = JSON.stringify({
+                type: 'text',
+                content: "Sorry, I'm having trouble answering right now. Please try again in a few minutes.",
+              });
+              controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+              continue;
+            }
             if (chunk.type === 'text-delta') {
               fullAssistantMessage += chunk.text;
               const data = JSON.stringify({ 
