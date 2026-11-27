@@ -1,4 +1,5 @@
 import { Agent, Memory } from '@voltagent/core';
+import { MODELS } from './models';
 import { google } from '@ai-sdk/google';
 import { googleDocsTool } from './tools/google-docs-tool';
 import { SupabaseMemoryAdapter } from '@voltagent/supabase';
@@ -94,7 +95,7 @@ Ready for the next question?
 \`\`\`
 `,
     
-    model: google('gemini-3.5-flash'),
+    model: google(MODELS.chat),
     tools: [googleDocsTool],
   });
 
