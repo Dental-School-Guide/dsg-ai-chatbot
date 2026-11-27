@@ -8,7 +8,7 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 
 /**
- * POST /api/messages/:id/feedback  { rating: 'up' | 'down' | null, comment?: string }
+ * POST /api/messages/:id/feedback  { rating: 'up' | 'down' | null, reasons?: string[], comment?: string }
  * Saves a student's 👍/👎 on one of Eden's answers into that message's metadata.
  * Students can only rate messages in their own conversations.
  */
@@ -43,6 +43,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return json({ error: "rating must be 'up', 'down' or null" }, 400);
     }
     const comment = typeof body?.comment === 'string' ? body.comment.trim().slice(0, 1000) : undefined;
+    const reasons = Array.isArray(body?.reasons)
+      ? body.reasons.filter((r: unknown): r is string => typeof r === 'string').map((r: string) => r.slice(0, 80)).slice(0, 8)
+      : undefined;
 
     const { data: message, error: fetchError } = await supabase
       .from('voltagent_memory_messages')
@@ -59,12 +62,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (rating === null) {
       delete metadata.feedback;
       delete metadata.feedback_comment;
+      delete metadata.feedback_reasons;
       delete metadata.feedback_at;
     } else {
       metadata.feedback = rating;
       metadata.feedback_at = new Date().toISOString();
-      if (comment !== undefined) metadata.feedback_comment = comment;
-      else if (rating === 'up') delete metadata.feedback_comment;
+      if (rating === 'up') {
+        // A 👍 replaces any earlier 👎 details
+        delete metadata.feedback_comment;
+        delete metadata.feedback_reasons;
+      } else {
+        if (comment !== undefined) metadata.feedback_comment = comment;
+        if (reasons !== undefined) metadata.feedback_reasons = reasons;
+      }
     }
 
     const { error: updateError } = await supabase
