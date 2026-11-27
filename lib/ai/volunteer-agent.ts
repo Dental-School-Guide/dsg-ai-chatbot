@@ -1,4 +1,5 @@
 import { Agent, Memory } from '@voltagent/core';
+import { MODELS } from './models';
 import { google } from '@ai-sdk/google';
 import { volunteerOpportunitiesTool } from './tools/volunteer-opportunities-tool';
 import { SupabaseMemoryAdapter } from '@voltagent/supabase';
@@ -84,7 +85,7 @@ export function createVolunteerAgent() {
 **IMPORTANT:** Write the complete URL in your response text. Do not reference variables - write the actual URL string.
 
 Always be helpful, encouraging, and make it easy for students to take action by providing clear links.`,
-    model: google('gemini-3.5-flash'),
+    model: google(MODELS.chat),
     tools: [volunteerOpportunitiesTool],
   });
 

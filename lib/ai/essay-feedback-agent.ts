@@ -1,4 +1,5 @@
 import { Agent, Memory } from '@voltagent/core';
+import { MODELS } from './models';
 import { google } from '@ai-sdk/google';
 import { createTool } from '@voltagent/core';
 import { z } from 'zod';
@@ -143,7 +144,7 @@ When analyzing an essay, provide:
 - Ensure feedback helps the applicant stand out in a competitive pool
 
 Always format your response using Markdown with clear headings and bullet points.`,
-    model: google('gemini-2.5-flash'),
+    model: google(MODELS.essay),
     tools: [essayScoringTool],
   });
 

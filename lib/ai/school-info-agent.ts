@@ -1,4 +1,5 @@
 import { Agent, Memory } from '@voltagent/core';
+import { MODELS } from './models';
 import { google } from '@ai-sdk/google';
 import { googleSheetsTool } from './tools/google-sheets-tool';
 import { schoolWebsiteSearchTool } from './tools/school-website-search-tool';
@@ -122,7 +123,7 @@ You have access to conversation history. Use it intelligently:
 
 Always be helpful, accurate, and base your answers on the database information.
 If information is not in the database, be honest about it.`,
-    model: google('gemini-3.5-flash'),
+    model: google(MODELS.chat),
     tools: [googleSheetsTool, schoolWebsiteSearchTool],
   });
 

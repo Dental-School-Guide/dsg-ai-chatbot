@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { MODELS } from '@/lib/ai/models';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
@@ -72,7 +73,7 @@ export async function POST(
 
     // Generate title using Google AI
     const { text: generatedTitle } = await generateText({
-      model: google('gemini-2.0-flash-exp'),
+      model: google(MODELS.title),
       prompt: `Based on these user messages, generate a short chat title with NO MORE THAN 6 WORDS. Only return the title, nothing else.
 
 User messages:

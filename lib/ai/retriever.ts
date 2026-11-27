@@ -1,4 +1,5 @@
 import { BaseRetriever } from '@voltagent/core';
+import { MODELS } from './models';
 import { createClient } from '@supabase/supabase-js';
 import { google } from '@ai-sdk/google';
 import { embed } from 'ai';
@@ -27,7 +28,7 @@ export class LessonRetriever extends BaseRetriever {
     try {
       // Generate embedding for the query using Google
       const { embedding } = await embed({
-        model: google.textEmbeddingModel('gemini-embedding-001'),
+        model: google.textEmbeddingModel(MODELS.embedding),
         value: query,
         providerOptions: {
           google: {
