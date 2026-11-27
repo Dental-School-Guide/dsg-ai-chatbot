@@ -24,6 +24,51 @@ const SHEET_GID = process.env.SCHOOL_STATS_SHEET_GID || '';
 const SHEET_NAME = process.env.SCHOOL_STATS_SHEET_TAB || 'Import Range Master Stats';
 const HEADER_ROWS = Math.max(1, parseInt(process.env.SCHOOL_STATS_HEADER_ROWS || '1', 10) || 1);
 
+// Which sections (top header row) Eden may use. Comma-separated, matching the
+// sheet's section names exactly. Empty = every column.
+//   SCHOOL_STATS_SECTIONS            always included
+//   SCHOOL_STATS_ON_REQUEST_SECTIONS only included when the question is about them
+//   SCHOOL_STATS_EXCLUDE_COLUMNS     drop any column whose label contains one of
+//                                    these phrases (case-insensitive)
+const splitList = (value?: string) =>
+  (value || '').split(',').map((v) => v.trim()).filter(Boolean);
+const SECTIONS = splitList(process.env.SCHOOL_STATS_SECTIONS);
+const ON_REQUEST_SECTIONS = splitList(process.env.SCHOOL_STATS_ON_REQUEST_SECTIONS);
+const EXCLUDE_COLUMNS = splitList(process.env.SCHOOL_STATS_EXCLUDE_COLUMNS).map((v) => v.toLowerCase());
+
+// Words too generic to signal that a question is about an on-request section
+const TRIGGER_STOPWORDS = new Set(['dental', 'school', 'schools', 'program', 'programs', 'and', 'the']);
+
+/** On-request sections the question is about: explicitly asked for, or named in the query. */
+export function requestedSections(query: string, asked: string[] = []): string[] {
+  const q = query.toLowerCase();
+  const askedLower = asked.map((a) => a.toLowerCase());
+  return ON_REQUEST_SECTIONS.filter((section) => {
+    const name = section.toLowerCase();
+    if (askedLower.some((a) => name.includes(a) || a.includes(name))) return true;
+    const words = name.split(/[^a-z]+/).filter((w) => w.length > 3 && !TRIGGER_STOPWORDS.has(w));
+    // match on word stems so "letter" finds "Letters", "intl" style aliases aside
+    return words.some((w) => q.includes(w.replace(/s$/, '')));
+  });
+}
+
+/** Keep only the columns Eden is allowed to use for this question. */
+export function filterColumns(row: SheetRow, extraSections: string[]): SheetRow {
+  const allowed = [...SECTIONS, ...extraSections];
+  const filtered: SheetRow = {};
+  for (const [label, value] of Object.entries(row)) {
+    if (label === NAME_FIELD) {
+      filtered[label] = value;
+      continue;
+    }
+    const lower = label.toLowerCase();
+    if (EXCLUDE_COLUMNS.some((phrase) => lower.includes(phrase))) continue;
+    if (allowed.length > 0 && !allowed.some((sec) => label === sec || label.startsWith(`${sec} – `))) continue;
+    filtered[label] = value;
+  }
+  return filtered;
+}
+
 // Most schools returned for one search, so a broad query ("GPA") can't flood the answer
 const MAX_MATCHES = 5;
 
@@ -164,7 +209,10 @@ async function fetchSheetData(): Promise<SheetRow[]> {
 /**
  * Search through sheet data for relevant information
  */
-function searchSheetData(data: SheetRow[], query: string): string {
+function searchSheetData(allData: SheetRow[], query: string, askedSections: string[] = []): string {
+  const extra = requestedSections(query, askedSections);
+  if (extra.length) console.log('[Google Sheets Tool] Including on-request sections:', extra);
+  const data = allData.map((row) => filterColumns(row, extra));
   const lowerQuery = query.toLowerCase();
   const queryWords = lowerQuery.split(/\s+/).filter(w => w.length > 2); // Split into words, ignore short words
   const results: string[] = [];
@@ -216,7 +264,7 @@ export const googleSheetsTool = createTool({
   Use this tool to find information about specific dental schools, their requirements, 
   statistics, application details, or any other school-related data. 
   
-  The tool searches through ALL columns and rows, matching any part of the text.
+  The tool searches the school stats sheet, matching any part of the text.
   
   SEARCH TIPS:
   - For abbreviations like "UCLA", search with just "UCLA" - it will find matches
@@ -228,8 +276,16 @@ export const googleSheetsTool = createTool({
   The tool returns complete school profiles with all available data.`,
   parameters: z.object({
     query: z.string().describe('The search query - school name (full or abbreviation), location, or specific data field. Examples: "UCLA", "University of California Los Angeles", "California schools", "mean GPA"'),
+    include_sections: z
+      .array(z.string())
+      .optional()
+      .describe(
+        `Extra sections to include ONLY when the student asks about them. Available: ${
+          ON_REQUEST_SECTIONS.join('; ') || 'none'
+        }. Leave empty otherwise.`
+      ),
   }),
-  execute: async ({ query }) => {
+  execute: async ({ query, include_sections }) => {
     console.log('[Google Sheets Tool] Searching for:', query);
     
     try {
@@ -238,7 +294,7 @@ export const googleSheetsTool = createTool({
       console.log(`[Google Sheets Tool] Loaded ${data.length} rows from sheet`);
 
       // Search through the data
-      const results = searchSheetData(data, query);
+      const results = searchSheetData(data, query, include_sections ?? []);
       console.log('[Google Sheets Tool] Search completed');
 
       return {
