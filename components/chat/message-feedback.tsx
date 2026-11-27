@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react';
-import { ThumbsUp, ThumbsDown, Copy, Check, X } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
@@ -22,17 +22,15 @@ const iconButton =
 
 /**
  * Action bar under one of Eden's answers, modelled on ChatGPT:
- * a feedback button that opens "Good response / Bad response", plus Copy.
+ * a feedback button that opens "Good response / Bad response".
  * "Bad response" asks what went wrong (quick reasons + optional note).
  * Ratings are saved to the message's metadata and shown in the admin panel.
  */
 export function MessageFeedback({
   messageId,
-  content,
   initialRating = null,
 }: {
   messageId: string;
-  content?: string;
   initialRating?: Rating;
 }) {
   const [rating, setRating] = useState<Rating>(initialRating);
@@ -41,7 +39,6 @@ export function MessageFeedback({
   const [reasons, setReasons] = useState<string[]>([]);
   const [comment, setComment] = useState('');
   const [saving, setSaving] = useState(false);
-  const [copied, setCopied] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close the menu when clicking anywhere else
@@ -108,19 +105,6 @@ export function MessageFeedback({
 
   const toggleReason = (reason: string) =>
     setReasons((prev) => (prev.includes(reason) ? prev.filter((r) => r !== reason) : [...prev, reason]));
-
-  const copy = async () => {
-    if (!content) return;
-    // Copy the answer without the auto-added sources list
-    const text = content.split('\n---\n\n**📚 Sources:**')[0].trim();
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      toast.error("Couldn't copy");
-    }
-  };
 
   return (
     <div className="mt-1">
@@ -194,12 +178,6 @@ export function MessageFeedback({
           )}
         </div>
 
-        {/* Copy */}
-        {content ? (
-          <button type="button" className={iconButton} aria-label="Copy answer" title="Copy" onClick={copy}>
-            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-          </button>
-        ) : null}
       </div>
 
       {/* "Bad response" details */}
