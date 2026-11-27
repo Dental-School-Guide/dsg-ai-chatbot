@@ -11,7 +11,8 @@ export const MODELS = {
   // Main chat + interview drill, school info, volunteer agents
   chat: process.env.GEMINI_CHAT_MODEL || 'gemini-3.5-flash',
   // Essay feedback agent
-  essay: process.env.GEMINI_ESSAY_MODEL || 'gemini-2.5-flash',
+  // Upgraded from gemini-2.5-flash (Nov 2026) for stronger essay critiques
+  essay: process.env.GEMINI_ESSAY_MODEL || 'gemini-3.5-flash',
   // Short auto-generated conversation titles
   title: process.env.GEMINI_TITLE_MODEL || 'gemini-3.5-flash',
   // Knowledge-base search. Changing this requires re-embedding stored documents,

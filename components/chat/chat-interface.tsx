@@ -9,6 +9,9 @@ import { apiFetch } from '@/lib/api-client';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  /** Saved message ID (assistant messages only), used for 👍/👎 */
+  id?: string;
+  feedback?: 'up' | 'down' | null;
 }
 
 interface ChatInterfaceProps {
@@ -96,6 +99,8 @@ export function ChatInterface({ conversationId, onConversationCreated, onConvers
         const loadedMessages: Message[] = data.messages.map((msg: any) => ({
           role: msg.role,
           content: msg.parts?.[0]?.text || msg.parts?.[0]?.content || '',
+          id: msg.role === 'assistant' ? msg.message_id : undefined,
+          feedback: msg.metadata?.feedback ?? null,
         }));
         
         // Filter out any initial welcome messages if they were accidentally saved
@@ -204,6 +209,16 @@ export function ChatInterface({ conversationId, onConversationCreated, onConvers
                     };
                     return newMessages;
                   });
+                } else if (data.type === 'finish' && data.messageId) {
+                  // Attach the saved ID so the student can rate this answer
+                  setMessages((prev) => {
+                    const newMessages = [...prev];
+                    const last = newMessages[newMessages.length - 1];
+                    if (last?.role === 'assistant') {
+                      newMessages[newMessages.length - 1] = { ...last, id: data.messageId };
+                    }
+                    return newMessages;
+                  });
                 }
               } catch (e) {
                 // Skip invalid JSON
@@ -273,6 +288,8 @@ export function ChatInterface({ conversationId, onConversationCreated, onConvers
               role={message.role}
               title={index === 0 ? 'Welcome to Dental Mentor AI' : undefined}
               content={message.content}
+              messageId={message.id}
+              feedback={message.feedback}
             />
           ))}
           

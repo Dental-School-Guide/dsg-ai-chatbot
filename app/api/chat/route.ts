@@ -214,6 +214,10 @@ export async function POST(req: NextRequest) {
       conversationId: conversationId || `conv_${Date.now()}`,
     });
 
+    // ID for the assistant message we're about to save; sent to the client so the
+    // student can rate this answer with 👍/👎
+    const assistantMessageId = `msg_${Date.now()}_assistant_${Math.random().toString(36).slice(2, 8)}`;
+
     // Create a streaming response
     const encoder = new TextEncoder();
     const contextIds = new Set<string>();
@@ -413,7 +417,6 @@ export async function POST(req: NextRequest) {
                   }
 
                   // Save assistant message (using Voltagent V2 format)
-                  const assistantMessageId = `msg_${Date.now()}_assistant`;
                   const { error: assistantMsgError } = await supabase
                     .from('voltagent_memory_messages')
                     .insert({
@@ -439,6 +442,7 @@ export async function POST(req: NextRequest) {
               const data = JSON.stringify({ 
                 type: 'finish',
                 usage: chunk.totalUsage,
+                messageId: conversationId ? assistantMessageId : undefined,
               });
               controller.enqueue(encoder.encode(`data: ${data}\n\n`));
             }

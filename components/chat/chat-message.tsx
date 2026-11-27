@@ -2,6 +2,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { MessageFeedback } from './message-feedback';
 
 export function ChatMessage({
   role,
@@ -9,12 +10,17 @@ export function ChatMessage({
   children,
   className,
   content,
+  messageId,
+  feedback,
 }: {
   role: "assistant" | "user";
   title?: string;
   children?: React.ReactNode;
   className?: string;
   content?: string;
+  /** Saved message ID; when set on an assistant message, 👍/👎 are shown */
+  messageId?: string;
+  feedback?: 'up' | 'down' | null;
 }) {
   const isAssistant = role === "assistant";
   return (
@@ -95,6 +101,9 @@ export function ChatMessage({
             </div>
           </div>
         </div>
+        {isAssistant && messageId ? (
+          <MessageFeedback messageId={messageId} initialRating={feedback ?? null} />
+        ) : null}
       </div>
     </div>
   );
