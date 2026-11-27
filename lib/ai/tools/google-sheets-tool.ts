@@ -189,7 +189,8 @@ async function fetchSheetData(): Promise<SheetRow[]> {
       : `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
 
     console.log('[Google Sheets Tool] Fetching from:', csvUrl);
-    const response = await fetch(csvUrl);
+    // no-store: always read the sheet as it is right now, never a cached copy
+    const response = await fetch(csvUrl, { cache: 'no-store' });
     if (!response.ok) {
       throw new Error(`Failed to fetch sheet: ${response.statusText}. Is it shared as "Anyone with the link"?`);
     }
