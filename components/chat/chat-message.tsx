@@ -102,7 +102,7 @@ export function ChatMessage({
           </div>
         </div>
         {isAssistant && messageId ? (
-          <MessageFeedback messageId={messageId} initialRating={feedback ?? null} />
+          <MessageFeedback messageId={messageId} content={content} initialRating={feedback ?? null} />
         ) : null}
       </div>
     </div>
