@@ -18,7 +18,7 @@ const BAD_REASONS = [
 ];
 
 const iconButton =
-  'inline-flex h-8 w-8 items-center justify-center rounded-lg text-[--text-dim] transition-colors hover:bg-white/10 hover:text-[--text] disabled:opacity-50';
+  'inline-flex h-8 w-8 items-center justify-center rounded-lg text-[--text-dim] transition-colors hover:bg-white/10 hover:text-[--text] disabled:opacity-50 focus:outline-none focus-visible:ring-1 focus-visible:ring-[--dsg-gold]';
 
 /**
  * Action bar under one of Eden's answers, modelled on ChatGPT:
@@ -39,7 +39,30 @@ export function MessageFeedback({
   const [reasons, setReasons] = useState<string[]>([]);
   const [comment, setComment] = useState('');
   const [saving, setSaving] = useState(false);
+  const [openUp, setOpenUp] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const badPanelRef = useRef<HTMLDivElement>(null);
+
+  // Open the menu upward when there isn't room below (e.g. on the last answer,
+  // where the chat's scroll area would otherwise cut it off)
+  const toggleMenu = () => {
+    if (!menuOpen && buttonRef.current) {
+      const button = buttonRef.current.getBoundingClientRect();
+      const scroller = buttonRef.current.closest('.overflow-y-auto');
+      const bottomLimit = Math.min(
+        window.innerHeight,
+        scroller ? scroller.getBoundingClientRect().bottom : window.innerHeight
+      );
+      setOpenUp(bottomLimit - button.bottom < 150);
+    }
+    setMenuOpen((o) => !o);
+  };
+
+  // Bring the "What went wrong?" box into view when it opens
+  useEffect(() => {
+    if (badOpen) badPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [badOpen]);
 
   // Close the menu when clicking anywhere else
   useEffect(() => {
@@ -112,6 +135,7 @@ export function MessageFeedback({
         {/* Feedback button + menu */}
         <div className="relative" ref={menuRef}>
           <button
+            ref={buttonRef}
             type="button"
             className={cn(iconButton, menuOpen && 'bg-white/10 text-[--text]')}
             aria-label="Give feedback"
@@ -119,7 +143,7 @@ export function MessageFeedback({
             aria-expanded={menuOpen}
             title="Give feedback"
             disabled={saving}
-            onClick={() => setMenuOpen((o) => !o)}
+            onClick={toggleMenu}
           >
             {rating === 'up' ? (
               <ThumbsUp className="h-4 w-4" fill="currentColor" />
@@ -137,7 +161,10 @@ export function MessageFeedback({
           {menuOpen && (
             <div
               role="menu"
-              className="absolute left-0 top-9 z-20 min-w-[190px] rounded-xl border border-[--dsg-edge] bg-[--dsg-panel] p-1.5 shadow-xl"
+              className={cn(
+                'absolute left-0 z-20 min-w-[190px] rounded-xl border border-[--dsg-edge] bg-[--dsg-panel] p-1.5 shadow-xl',
+                openUp ? 'bottom-9' : 'top-9'
+              )}
             >
               <button
                 role="menuitem"
@@ -182,7 +209,7 @@ export function MessageFeedback({
 
       {/* "Bad response" details */}
       {badOpen && (
-        <div className="mt-2 max-w-xl rounded-xl border border-[--dsg-edge] bg-[--dsg-panel] p-4 text-left">
+        <div ref={badPanelRef} className="mt-2 max-w-xl scroll-mb-4 rounded-xl border border-[--dsg-edge] bg-[--dsg-panel] p-4 text-left">
           <div className="mb-3 flex items-start justify-between gap-4">
             <p className="text-sm font-medium text-[--text]">What went wrong?</p>
             <button
